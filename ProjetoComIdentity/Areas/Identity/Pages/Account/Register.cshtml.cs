@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -44,15 +45,20 @@ namespace ProjetoComIdentity.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            // Add esse atributo para fazer a validação do usuário
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Display(Name = "Cargo")]
+            public string Cargo { get; set; }
+
+            [Required]
+            [StringLength(100, ErrorMessage = "A {0} Tem que ter no mínimo {2} e no máximo {1} Caracteres.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Senha")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Confirme a Senha")]
+            [Compare("Password", ErrorMessage = "As senhas não são iguais.")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -71,6 +77,9 @@ namespace ProjetoComIdentity.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    //Adicionei esse comando abaixo para fazer a validação
+                    await _userManager.AddClaimAsync(user, new Claim("Cargo", Input.Cargo));
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var callbackUrl = Url.Page(

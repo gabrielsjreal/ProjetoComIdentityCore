@@ -38,10 +38,26 @@ namespace ProjetoComIdentity
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            // O comando abaixo é configurado de forma padrão, com todos os critérios de criação da senha
+            //No min:1 letra Maiúscula, 1 Minúscula, 1 Caracter especial
+            // no min 3  e max 6 - tamanho da senha
+            //services.AddDefaultIdentity<IdentityUser>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+            // o camando abaixo foi modificado em relação com o origianal acima, para não ter mais os critérios de definição de senha
+            services.AddDefaultIdentity<IdentityUser>(config =>{
+                config.Password.RequireDigit = false;
+                config.Password.RequiredLength = 3;
+                config.Password.RequireLowercase = false;
+                config.Password.RequireUppercase = false;
+                config.Password.RequireNonAlphanumeric = false;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddAuthorization(options =>
+            options.AddPolicy("SomenteGestores", policy => policy.RequireClaim("Cargo", "Gerente")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
